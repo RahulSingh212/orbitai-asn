@@ -4,7 +4,8 @@ import { ProfileForm, ResultsDisplay } from './components/organisms';
 import { Spinner, ThemeToggle } from './components/atoms';
 import './App.css';
 
-const API_URL = 'http://localhost:8000';
+// Use relative URL for production, localhost for development
+const API_URL = import.meta.env.PROD ? '' : 'http://localhost:8000';
 
 function App() {
   const [universities, setUniversities] = useState<University[]>([]);

@@ -2,6 +2,12 @@
 
 A full-stack web application that helps students find their perfect university match using advanced statistical algorithms and data from 76 top MBA programs.
 
+## 🌐 Live Demo
+
+**🚀 App is live:** [https://orbitai-mu3dpypziq-uc.a.run.app](https://orbitai-mu3dpypziq-uc.a.run.app)
+
+Deployed on Google Cloud Run with both frontend and backend in a single container.
+
 ## 🎯 Overview
 
 OrbitAI analyzes your academic profile (GMAT, GPA, work experience) and matches you with universities where you have the highest chances of admission. The system categorizes matches into Safety, Target, and Reach schools to help you build a balanced application strategy.

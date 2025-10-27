@@ -1,8 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import uvicorn
+import os
+from pathlib import Path
 
 from database import init_db, get_db, User, University, Search, SearchResult
 from models import (
@@ -25,35 +29,24 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Configure CORS - allow all origins in production (since frontend is served from same domain)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://localhost:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:3000",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
-@app.get("/")
-async def root():
-    return {
-        "message": "Welcome to OrbitAI - Right Fit Matcher API",
-        "status": "running",
-        "version": "1.0.0",
-        "endpoints": {
-            "match": "/api/match",
-            "universities": "/api/universities",
-            "health": "/health",
-        },
-    }
+# Mount static files - serve the built React frontend
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/assets", StaticFiles(directory=str(static_dir / "assets")), name="assets")
+    print(f"✓ Serving frontend static files from {static_dir}")
 
 
-@app.get("/health")
+@app.get("/api/health")
+@app.get("/health")  # Keep old endpoint for backward compatibility
 async def health_check(db: Session = Depends(get_db)):
     try:
         university_count = db.query(University).count()
@@ -283,6 +276,37 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="User not found")
 
     return user
+
+
+# Catch-all route to serve the React frontend (must be last!)
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str):
+    """
+    Serve the React frontend for all non-API routes.
+    This allows client-side routing to work properly.
+    """
+    # For root path or empty path, serve index.html directly
+    if not full_path or full_path == "/":
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+    
+    # Check if the requested file exists in static directory
+    static_file = static_dir / full_path
+    if static_file.is_file():
+        return FileResponse(static_file)
+    
+    # For any other path (client-side routing), serve index.html
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    
+    # If no static files exist, return API info
+    return {
+        "message": "OrbitAI API is running",
+        "note": "Frontend not built yet. Run 'npm run build' in the frontend directory.",
+        "api_docs": "/docs"
+    }
 
 
 if __name__ == "__main__":
