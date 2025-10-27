@@ -1,0 +1,11 @@
+# Ignore all .env files
+.env
+.env.*
+
+# Optional: Ignore virtual environments
+env/
+venv/
+ENV/
+
+# Ignore all the redis debug files
+tmp/*
