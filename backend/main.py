@@ -17,7 +17,6 @@ from models import (
 )
 from matcher import CollegeMatcher
 
-# Initialize database
 init_db()
 
 app = FastAPI(
@@ -26,7 +25,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Configure CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -41,12 +39,8 @@ app.add_middleware(
 )
 
 
-# ==================== Health Check Endpoints ====================
-
-
 @app.get("/")
 async def root():
-    """Root endpoint with API information"""
     return {
         "message": "Welcome to OrbitAI - Right Fit Matcher API",
         "status": "running",
@@ -61,9 +55,7 @@ async def root():
 
 @app.get("/health")
 async def health_check(db: Session = Depends(get_db)):
-    """Health check with database connection"""
     try:
-        # Test database connection
         university_count = db.query(University).count()
         return {
             "status": "healthy",
@@ -76,9 +68,6 @@ async def health_check(db: Session = Depends(get_db)):
             "database": "error",
             "error": str(e),
         }
-
-
-# ==================== Core Matching Endpoint ====================
 
 
 @app.post("/api/match", response_model=MatchResponse)
@@ -95,7 +84,6 @@ async def match_universities(
     4. Returns ranked list of best-fit universities
     """
     try:
-        # Get all universities matching the target program
         universities = (
             db.query(University)
             .filter(University.program_type == profile.target_program)
@@ -108,7 +96,6 @@ async def match_universities(
                 detail=f"No universities found for program type: {profile.target_program}. Currently, only MBA programs are available. MS and Executive MBA programs are coming soon!",
             )
 
-        # Run matching algorithm
         matches = CollegeMatcher.match_universities(
             user_gmat=profile.gmat_score,
             user_gpa=profile.gpa,
@@ -117,7 +104,6 @@ async def match_universities(
             universities=universities,
         )
 
-        # Create search record
         search = Search(
             gmat_score=profile.gmat_score,
             gpa=profile.gpa,
@@ -128,10 +114,8 @@ async def match_universities(
         db.commit()
         db.refresh(search)
 
-        # Format response
         university_matches = []
         for university, admission_prob in matches:
-            # Create search result record
             search_result = SearchResult(
                 search_id=search.id,
                 university_id=university.id,
@@ -139,7 +123,6 @@ async def match_universities(
             )
             db.add(search_result)
 
-            # Format match response
             match = UniversityMatch(
                 university=university.name,
                 admission_chance=f"{admission_prob:.1f}",
@@ -171,9 +154,6 @@ async def match_universities(
             status_code=500,
             detail=f"Matching error: {str(e)}",
         )
-
-
-# ==================== Universities Endpoint ====================
 
 
 @app.get("/api/universities", response_model=List[UniversityResponse])
@@ -209,9 +189,6 @@ async def get_university(university_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="University not found")
 
     return university
-
-
-# ==================== Search History Endpoints ====================
 
 
 @app.get("/api/searches", response_model=List[SearchResponse])
@@ -279,9 +256,6 @@ async def get_search_results(search_id: int, db: Session = Depends(get_db)):
     )
 
 
-# ==================== User Management Endpoints ====================
-
-
 @app.post("/api/users", response_model=UserResponse)
 async def create_user(user: UserCreateRequest, db: Session = Depends(get_db)):
     """Create a new user"""
@@ -316,5 +290,5 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Enable auto-reload during development
+        reload=True,
     )

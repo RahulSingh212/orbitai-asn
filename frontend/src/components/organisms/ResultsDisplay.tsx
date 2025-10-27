@@ -5,12 +5,15 @@ import {
   UniversityCard,
   FilterButton,
   StatCard,
+  ExportButtons,
 } from "../molecules";
-import type { University } from "../../types";
+import { AnalyticsCharts } from "./AnalyticsCharts";
+import type { University, UserProfile } from "../../types";
 
 interface ResultsDisplayProps {
   universities: University[];
   onReset: () => void;
+  userProfile?: UserProfile;
 }
 
 type SortOption = "chance" | "ranking" | "tuition" | "acceptance";
@@ -19,10 +22,12 @@ type FilterOption = "all" | "safety" | "target" | "reach";
 export const ResultsDisplay = ({
   universities,
   onReset,
+  userProfile,
 }: ResultsDisplayProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("chance");
   const [filterBy, setFilterBy] = useState<FilterOption>("all");
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   // Filter and sort universities
   const processedUniversities = useMemo(() => {
@@ -101,9 +106,18 @@ export const ResultsDisplay = ({
               profile
             </p>
           </div>
-          <Button variant="outline" onClick={onReset}>
-            🔄 New Search
-          </Button>
+          <div className="flex gap-2 flex-wrap">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowAnalytics(!showAnalytics)}
+            >
+              {showAnalytics ? "📋 View List" : "📊 View Analytics"}
+            </Button>
+            <ExportButtons universities={universities} userProfile={userProfile} />
+            <Button variant="outline" onClick={onReset}>
+              🔄 New Search
+            </Button>
+          </div>
         </div>
 
         {/* Statistics */}
@@ -197,27 +211,34 @@ export const ResultsDisplay = ({
         </div>
       </div>
 
-      {/* Results Grid */}
-      {processedUniversities.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {processedUniversities.map((university, index) => (
-            <UniversityCard
-              key={university.university}
-              university={university}
-              rank={index + 1}
-            />
-          ))}
-        </div>
+      {/* Analytics Dashboard or Results Grid */}
+      {showAnalytics ? (
+        <AnalyticsCharts universities={universities} />
       ) : (
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center border-2 border-gray-200 dark:border-gray-700 transition-colors duration-200">
-          <p className="text-2xl mb-2">🔍</p>
-          <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            No universities found
-          </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Try adjusting your search or filter criteria
-          </p>
-        </div>
+        <>
+          {/* Results Grid */}
+          {processedUniversities.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {processedUniversities.map((university, index) => (
+                <UniversityCard
+                  key={university.university}
+                  university={university}
+                  rank={index + 1}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-gray-800 rounded-xl p-12 text-center border-2 border-gray-200 dark:border-gray-700 transition-colors duration-200">
+              <p className="text-2xl mb-2">🔍</p>
+              <p className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                No universities found
+              </p>
+              <p className="text-gray-600 dark:text-gray-400">
+                Try adjusting your search or filter criteria
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

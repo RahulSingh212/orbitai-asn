@@ -67,19 +67,13 @@ export const ProfileForm = ({ onSubmit, isLoading }: ProfileFormProps) => {
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    console.log('📝 ProfileForm: Form submit triggered');
 
-    // Validate all fields
     const newErrors: FormErrors = {};
     Object.keys(profile).forEach((key) => {
       const error = validateField(key, profile[key as keyof UserProfile]);
       if (error) newErrors[key as keyof FormErrors] = error;
     });
 
-    console.log('📝 ProfileForm: Validation errors:', newErrors);
-    console.log('📝 ProfileForm: Profile data:', profile);
-
-    // Mark all as touched
     const allTouched: Record<string, boolean> = {};
     Object.keys(profile).forEach((key) => {
       allTouched[key] = true;
@@ -87,10 +81,8 @@ export const ProfileForm = ({ onSubmit, isLoading }: ProfileFormProps) => {
     setTouched(allTouched);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log('✅ ProfileForm: Validation passed, calling onSubmit');
       onSubmit(profile);
     } else {
-      console.error('❌ ProfileForm: Validation failed:', newErrors);
       setErrors(newErrors);
     }
   };

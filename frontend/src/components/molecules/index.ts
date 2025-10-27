@@ -4,4 +4,5 @@ export { StatCard } from "./StatCard";
 export { SearchBar } from "./SearchBar";
 export { UniversityCard } from "./UniversityCard";
 export { FilterButton } from "./FilterButton";
+export { ExportButtons } from "./ExportButtons";
 

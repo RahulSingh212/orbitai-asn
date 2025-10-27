@@ -3,10 +3,7 @@ from typing import Optional, List
 from datetime import datetime
 
 
-# Request Models
 class UserProfileRequest(BaseModel):
-    """User profile for matching"""
-
     gmat_score: int = Field(..., ge=0, le=800, description="GMAT score (0-800)")
     gpa: float = Field(..., ge=0.0, le=4.0, description="GPA (0.0-4.0)")
     work_experience: float = Field(
@@ -30,16 +27,11 @@ class UserProfileRequest(BaseModel):
 
 
 class UserCreateRequest(BaseModel):
-    """Create a new user"""
-
     email: str = Field(..., description="User email")
     name: str = Field(..., description="User name")
 
 
-# Response Models
 class ProgramStats(BaseModel):
-    """Program statistics for a university"""
-
     acceptance_rate: float
     avg_gmat: float
     avg_gpa: float
@@ -47,10 +39,8 @@ class ProgramStats(BaseModel):
 
 
 class UniversityMatch(BaseModel):
-    """University match result"""
-
     university: str
-    admission_chance: str  # Formatted as percentage string
+    admission_chance: str
     program_stats: ProgramStats
     location: Optional[str] = None
     ranking: Optional[int] = None
@@ -61,8 +51,6 @@ class UniversityMatch(BaseModel):
 
 
 class UniversityResponse(BaseModel):
-    """Full university details"""
-
     id: int
     name: str
     program_type: str
@@ -79,8 +67,6 @@ class UniversityResponse(BaseModel):
 
 
 class UserResponse(BaseModel):
-    """User details"""
-
     id: int
     email: str
     name: str
@@ -91,8 +77,6 @@ class UserResponse(BaseModel):
 
 
 class SearchResponse(BaseModel):
-    """Search history item"""
-
     id: int
     gmat_score: int
     gpa: float
@@ -106,8 +90,6 @@ class SearchResponse(BaseModel):
 
 
 class MatchResponse(BaseModel):
-    """Complete match response"""
-
     matches: List[UniversityMatch]
     search_id: Optional[int] = None
     total_universities: int

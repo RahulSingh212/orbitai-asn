@@ -24,13 +24,11 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  // Initialize theme from localStorage or system preference
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem("orbitai-theme") as Theme | null;
     if (savedTheme) {
       return savedTheme;
     }
-    // Check system preference
     if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
       return "dark";
     }
@@ -38,22 +36,16 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   });
 
   useEffect(() => {
-    // Apply theme to document
     const root = document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
-      console.log("✅ Dark mode enabled - added 'dark' class to <html>");
     } else {
       root.classList.remove("dark");
-      console.log("☀️ Light mode enabled - removed 'dark' class from <html>");
     }
-    // Save to localStorage
     localStorage.setItem("orbitai-theme", theme);
-    console.log("💾 Saved theme to localStorage:", theme);
   }, [theme]);
 
   const toggleTheme = () => {
-    console.log("🔄 Toggle clicked! Current theme:", theme);
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 

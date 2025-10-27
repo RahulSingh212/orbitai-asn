@@ -11,14 +11,14 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchId, setSearchId] = useState<number | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   const handleSubmit = async (profile: UserProfile) => {
-    console.log('🚀 Form submitted with profile:', profile);
     setLoading(true);
     setError(null);
+    setUserProfile(profile);
 
     try {
-      console.log('📡 Sending POST request to:', `${API_URL}/api/match`);
       const response = await fetch(`${API_URL}/api/match`, {
         method: 'POST',
         headers: {
@@ -27,24 +27,17 @@ function App() {
         body: JSON.stringify(profile),
       });
 
-      console.log('📥 Response status:', response.status, response.statusText);
-
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('❌ API Error:', errorData);
         throw new Error(errorData.detail || 'Failed to fetch matches');
       }
 
       const data = await response.json();
-      console.log('✅ Received data:', data);
-      console.log('🎓 Number of matches:', data.matches?.length);
       setUniversities(data.matches);
       setSearchId(data.search_id);
     } catch (err) {
-      console.error('💥 Error occurred:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
-      console.log('🏁 Request finished, loading set to false');
       setLoading(false);
     }
   };
@@ -53,6 +46,7 @@ function App() {
     setUniversities([]);
     setError(null);
     setSearchId(null);
+    setUserProfile(null);
   };
 
   return (
@@ -123,7 +117,11 @@ function App() {
 
         {/* Results Display */}
         {universities.length > 0 && !loading && (
-          <ResultsDisplay universities={universities} onReset={handleReset} />
+          <ResultsDisplay 
+            universities={universities} 
+            onReset={handleReset}
+            userProfile={userProfile || undefined}
+          />
         )}
       </main>
 
